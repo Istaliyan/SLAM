@@ -11,6 +11,8 @@ FPS = 30  # Frames per second
 def create_point_cloud(keypoints, frame):
     # Extract 2D points from keypoints
     points_2d = np.float32([kp.pt for kp in keypoints])
+    points_2d = np.array(points_2d)
+
     
     if len(points_2d) == 0:
         # Return empty point cloud if no keypoints found
@@ -22,6 +24,7 @@ def create_point_cloud(keypoints, frame):
     
     # Create 3D points by adding the depth dimension
     points_3d = np.hstack((points_2d, depths))
+    print(points_3d)
     
     # Create Open3D point cloud
     pcd = o3d.geometry.PointCloud()
@@ -82,26 +85,27 @@ if __name__ == "__main__":
     vis = o3d.visualization.Visualizer()
     vis.create_window("Point Cloud Viewer", width=W, height=H)
     render_option = vis.get_render_option()
-    render_option.point_size = 2.0  # Increase point size for better visibility
-    # render_option.background_color = np.array([0, 0, 0])  # Black background
+    render_option.point_size = 1  # Increase point size for better visibility
+    render_option.background_color = np.array([0, 0, 0])  # Black background
     
     # Add coordinate frame
     coord_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.5)
     vis.add_geometry(coord_frame)
     
     # Initialize video capture
-    cap = cv2.VideoCapture('./test.mp4')
-
+    video_path = './videos/test.mp4'
+    cap = cv2.VideoCapture(video_path)
+    
     # Initialize point cloud object for updating
     pcd = o3d.geometry.PointCloud()
     vis.add_geometry(pcd)
 
     # Set up initial view
     view_control = vis.get_view_control()
-    view_control.set_zoom(0.8)
+    view_control.set_zoom(W/2)
     view_control.set_front([0, 0, -1])
-    view_control.set_lookat([0, 0, 0])
-    view_control.set_up([0, -1, 0])
+    view_control.set_lookat([W/2, H/2, 0])
+    view_control.set_up([-1, 0, 0])
 
     while cap.isOpened():
         clock.tick(FPS)
